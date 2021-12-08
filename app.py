@@ -10,6 +10,7 @@ model = load_model('jeruk_pandan_class_model.h5')
 
 class_dict = {0: 'Daun Jeruk Nipis', 1: 'Daun Pandan'}
 
+
 def predict_label(img_path):
     query = cv2.imread(img_path)
     output = query.copy()
@@ -19,27 +20,31 @@ def predict_label(img_path):
     q = np.array(q, dtype='float') / 255.0
     q_pred = model.predict(q)
     predicted_bit = int(q_pred)
-    if q_pred<=0.5 :
+    if q_pred <= 0.5:
         return "Daun Jeruk"
-    else :
-        return  "Pandan"
+    else:
+        return "Pandan"
     # return class_dict[predicted_bit]
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
         if request.files:
             image = request.files['image']
-            img_path = os.path.join(app.config['UPLOAD_FOLDER'], image.filename)
+            img_path = os.path.join(
+                app.config['UPLOAD_FOLDER'], image.filename)
             image.save(img_path)
             prediction = predict_label(img_path)
             return render_template('index.html', uploaded_image=image.filename, prediction=prediction)
 
     return render_template('index.html')
 
+
 @app.route('/display/<filename>')
 def send_uploaded_image(filename=''):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
